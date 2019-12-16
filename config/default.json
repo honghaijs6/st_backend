@@ -1,0 +1,42 @@
+{
+  "host": "localhost",
+  "port": 3333,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 20
+  },
+  "mysql": "mysql://pma:741852963@115.78.5.75:3306/kpi_v2",
+
+  "db": {
+    "ip":"35.240.236.106:3306",
+    "dialect": "mysql",
+    "dbname": "scrm",
+    "username": "benjamin",
+    "password": "admin@333"
+  },
+  "authentication": {
+    "secret": "7d5dd51b0415393cb5459db9d369f9099409c1f3925cf288d018b8e4a6373c820cb564e37df03ffdc8753f3a3198bb5ca639f3b170d97942c8f26b76100070e37e4ba2b0bfa1c2659864f68b2945a5a06ae9ef45a11f7a3e41ae6786d852f7ab728f9124a77e821cd2316063c73d08d325622842f0c782b6e7d3c425d1e593151978cf65f3a4d653132be8708cf84f407b58ebdfa453b114887a428f6b7c3e1c20681af316daecbf7d04767a349dd4e90f90a2b58a695462d4349a5d37bbeb0690456f19249e9116e3114d7c2295dcfa28dd6b5dffd1ce440f9d6cbd9bf1fbbc5dff677a1f5070475a01dcae84764e602efc6562175ea93098f3acbab882e0cb",
+    "strategies": [
+      "jwt",
+      "local"
+    ],
+    "path": "/authentication",
+    "service": "users",
+    "jwt": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "https://yourdomain.com",
+      "subject": "anonymous",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "entity": "user",
+      "usernameField": "email",
+      "passwordField": "password"
+    }
+  }
+}
