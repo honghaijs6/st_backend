@@ -6,7 +6,7 @@
     "default": 10,
     "max": 20
   },
-  "mysql": "mysql://pma:741852963@115.78.5.75:3306/kpi_v2",
+  "mysql": "mysql://root:@localhost:3306/suoitien",
 
   "db": {
     "ip":"35.240.236.106:3306",

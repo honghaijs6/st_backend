@@ -111,7 +111,7 @@ const pushapi  = {
 
           const data = list[0] ;
 
-          if(data.cardno !== 0){
+          if(data.cardno !== "0"){
 
 
             this.moCoupon = mCoupon(app) ;

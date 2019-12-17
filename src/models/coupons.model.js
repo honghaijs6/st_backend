@@ -77,6 +77,10 @@ module.exports = function (app) {
     is_deleted:{
       type:DataTypes.TINYINT,
       defaultValue:0
+    },
+    type:{
+      type:DataTypes.STRING,
+      defaultValue:'nguoilon'
     }
   })
 
