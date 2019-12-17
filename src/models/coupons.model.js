@@ -308,7 +308,10 @@ module.exports = function (app) {
         let sql = ` SELECT
                           ${this._name}.*,
 
-                          users.name as creator, users.photoURL as creator_avatar `;
+                          users.name as creator, users.photoURL as creator_avatar,
+                          users.username as username
+
+                      `;
 
         const arr_type_condition = {
 
