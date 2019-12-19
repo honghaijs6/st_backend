@@ -90,7 +90,7 @@ class iRoute extends Service {
         if(data_out.name==="success"){
 
 
-          data.code = await this.Model._createCode() ;
+          data.code =  data.card_type === 0 ?  await this.Model._createCode() : data.code ;
           data_out.data = data_out.name==='success' ?  await this.Model.create(data) : data_out.data ;
             const rows = await this.Model.listAll('all',{query:{
                 max:1

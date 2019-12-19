@@ -81,6 +81,10 @@ module.exports = function (app) {
     type:{
       type:DataTypes.STRING,
       defaultValue:'nguoilon'
+    },
+    card_type:{
+      type:DataTypes.INTEGER,
+      defaultValue:0 
     }
   })
 

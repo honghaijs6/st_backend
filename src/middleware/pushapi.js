@@ -99,48 +99,52 @@ const pushapi  = {
       };
 
       request(options, (error, response, body)=> {
-        const json = JSON.parse(body);
 
-        console.log(json);
-        this.emit(app,json) ;
+        try{
+          const json = JSON.parse(body);
 
-
-        const list = json.data ;
-        if(list.length > 0){
+          console.log(json);
+          this.emit(app,json) ;
 
 
-          const data = list[0] ;
-
-          if(data.cardno !== "0"){
-
-
-            this.moCoupon = mCoupon(app) ;
-            this.moCoupon.getInfoByCode(data.cardno).then((res)=>{
-
-              const info = res.data ;
-              const count = parseInt(info.used_count) + 1 ;
-
-              if(count > info.number_offer){
-
-                this._deleteUserOnDevice(data) ;
-
-              }
-
-              this._increaseUsedCount(info) ;
+          const list = json.data ;
+          if(list.length > 0){
 
 
-            });
+            const data = list[0] ;
+
+            if(data.cardno !== "0"){
+
+
+              this.moCoupon = mCoupon(app) ;
+              this.moCoupon.getInfoByCode(data.cardno).then((res)=>{
+
+                const info = res.data ;
+                const count = parseInt(info.used_count) + 1 ;
+
+                if(count > info.number_offer){
+
+                  this._deleteUserOnDevice(data) ;
+
+                }
+
+                this._increaseUsedCount(info) ;
+
+
+              });
+
+
+            }
+
 
 
           }
 
 
 
-        }
+          this._pool(app);
+        }catch(err){}
 
-
-
-        this._pool(app);
 
       });
 
