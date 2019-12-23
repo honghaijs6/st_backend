@@ -122,7 +122,7 @@ const pushapi  = {
                 const info = res.data ;
                 const count = parseInt(info.used_count) + 1 ;
 
-                if(count > info.number_offer){
+                if(count >= info.number_offer){
 
                   this._deleteUserOnDevice(data) ;
 

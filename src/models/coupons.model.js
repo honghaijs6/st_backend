@@ -84,8 +84,14 @@ module.exports = function (app) {
     },
     card_type:{
       type:DataTypes.INTEGER,
-      defaultValue:0 
+      defaultValue:0
+    },
+
+    device_serial:{
+      type:DataTypes.STRING,
+      defaultValue:null
     }
+
   })
 
 
