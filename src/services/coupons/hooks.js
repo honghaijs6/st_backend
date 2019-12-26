@@ -28,7 +28,7 @@ module.exports = {
     find: [defautSchemaGet({Helper})],
     get: [],
     create: [
-      authenticate('jwt'),
+      //authenticate('jwt'),
       defaultSchemaPost({Helper,schema:['code']}), /* this guy return err: on missing Default field */
       //buildJsonFieldPost({ Helper ,schema :['title'] }), // This guy create json field stringify
       defaultKeyFieldPost() // this guy : add field default : [creator_id - company_id] to data for save

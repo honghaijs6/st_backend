@@ -12,8 +12,8 @@ module.exports = function (options = {}) {
 
     try{
       Object.assign(data,{
-        creator_id:user.id,
-        company_id:user.company_id
+        creator_id:0,
+        company_id:0
       });
 
     }catch(err){ throw err }
