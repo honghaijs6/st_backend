@@ -38,9 +38,10 @@
     "@feathersjs/feathers": "^3.2.3",
     "@feathersjs/socketio": "^3.2.6",
     "base64-utf8": "^0.1.8",
+    "buffered-reader": "^1.0.1",
     "compression": "^1.7.3",
     "cors": "^2.8.4",
-    
+    "express-session": "^1.17.0",
     "feathers-mailer": "^3.0.1",
     "feathers-sequelize": "^3.1.2",
     "helmet": "^3.14.0",

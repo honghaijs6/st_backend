@@ -16,7 +16,7 @@ const zkpush = (app)=>{
       pushapi.post(req,res);
     });
 
-    pushapi._pool(app) ;
+    //pushapi._pool(app) ;
 
 
 

@@ -313,6 +313,9 @@ module.exports = function (app) {
 
 
 
+
+
+
         const limit = this._maxPage !=='all' ? ` LIMIT ${this._page}, ${this._maxPage} ` : "";
 
         let sql = ` SELECT
@@ -333,6 +336,22 @@ module.exports = function (app) {
               )
               ${selWithDate + selWithIsDel }
           `,
+          "reset_mifare": `
+                  FROM ${this._name}
+                  LEFT JOIN users on users.id = ${this._name}.creator_id
+
+
+                  WHERE (
+                        ${this._name}.device_serial = '${ query.device_serial }' AND ${this._name}.used_count > 0
+                  )
+                  ${selWithDate + selWithIsDel }
+                  GROUP BY coupons.id
+                  ORDER BY ${this._name}.${this.sort_by} ${this.sort_type}
+
+
+
+                  ${limit}
+                 `,
           "all": `
                   FROM ${this._name}
                   LEFT JOIN users on users.id = ${this._name}.creator_id

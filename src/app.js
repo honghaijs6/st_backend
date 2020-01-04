@@ -1,7 +1,7 @@
 /*
 MAIN OBJECT :
 */
-
+const session = require('express-session');
 const path = require('path');
 const favicon = require('serve-favicon');
 const compress = require('compression');
@@ -25,6 +25,13 @@ const sequelize = require('./sequelize');
 const authentication = require('./authentication');
 
 const app = express(feathers());
+app.use(session({
+  secret: 'ssshhhhh',
+  proxy: true,
+  resave: true,
+  saveUninitialized: true
+
+}));
 
 // Load app configuration
 app.configure(configuration());

@@ -3,6 +3,7 @@ const PUSH_SERVER = 'http://115.78.5.75:8080'; //'http://10.121.113.6:8080';//'h
 
 const mCoupon = require('../models/coupons.model') ;
 
+
 const pushapi  = {
 
   _idTime:20000,
@@ -25,6 +26,7 @@ const pushapi  = {
     });*/
 
   },
+
 
 
   _deleteUserOnDevice(data){
@@ -154,90 +156,97 @@ const pushapi  = {
   },
 
   post(req,res){
-    const params = req.params;
-    const query = req.query;
 
-    let ret = {
-      desc:'ok',
-    };
+    try{
+      const params = req.params;
+      const query = req.query;
 
-    if(pushapi.allowMethod(params.method)){
-
-      const url = req.originalUrl.replace('/pushapi/','');
-      let options = { method: 'POST',
-            url: PUSH_SERVER+'/'+url,
+      let ret = {
+        desc:'ok',
       };
 
-      switch (params.method) {
-        case 'createCmd':
-          const idata = req.body ;
-          options.url += '&originalCmd='+idata.originalCmd
-          request(options, (error, response, body) =>{
-                //if (error) throw new Error(error);
+      if(pushapi.allowMethod(params.method)){
+
+        const url = req.originalUrl.replace('/pushapi/','');
+        let options = { method: 'POST',
+              url: PUSH_SERVER+'/'+url,
+        };
+
+        switch (params.method) {
+          case 'createCmd':
+            const idata = req.body ;
+            options.url += '&originalCmd='+idata.originalCmd
+            request(options, (error, response, body) =>{
+                  //if (error) throw new Error(error);
 
 
-                try{
-                  if(idata.originalCmd.indexOf('UPDATE')>-1 || idata.originalCmd.indexOf('DELETE')>-1){
-                    const json = JSON.parse(body);
-                    Object.assign(ret,{
-                      "cmdArray": {
-                          "cmdId": 0,
-                          "cmd": "",
-                          "cmdRet": "ID=0&Return=0&CMD="+idata.originalCmd,
+                  try{
+                    if(idata.originalCmd.indexOf('UPDATE')>-1 || idata.originalCmd.indexOf('DELETE')>-1){
+                      const json = JSON.parse(body);
+                      Object.assign(ret,{
+                        "cmdArray": {
+                            "cmdId": 0,
+                            "cmd": "",
+                            "cmdRet": "ID=0&Return=0&CMD="+idata.originalCmd,
 
-                       },
-                    });
-                    res.json(ret);
-
-                  }else{
-                    this.getCommandStatus((json)=>{
-
-                      Object.assign(ret,json);
+                         },
+                      });
                       res.json(ret);
 
-                    })
-                  }
-                }catch(err){}
+                    }else{
+                      this.getCommandStatus((json)=>{
+
+                        Object.assign(ret,json);
+                        res.json(ret);
+
+                      })
+                    }
+                  }catch(err){}
 
 
 
-          });
+            });
 
-        break;
+          break;
 
-        case 'realEvent':
+          case 'realEvent':
 
-          setTimeout(()=>{
-            this._realEvent((json)=>{
+            setTimeout(()=>{
+              this._realEvent((json)=>{
 
-              Object.assign(ret,json);
-              res.json(ret);
+                Object.assign(ret,json);
+                res.json(ret);
 
-            })
-          },1000)
-        break ;
+              })
+            },1000)
+          break ;
 
-        default:
-          request(options, function (error, response, body) {
-                if (error) throw new Error(error);
+          default:
+            request(options, function (error, response, body) {
+                  //if (error) throw new Error(error);
+                  //console.log(body);
+                  const json = JSON.parse(body)
+                  Object.assign(ret,json)
+                  res.json(ret)
 
-                //console.log(body);
-                const json = JSON.parse(body)
-                Object.assign(ret,json)
-                res.json(ret)
+            });
+          break ;
 
-          });
-        break ;
+        }
 
+
+      }else{
+        res.json({
+          desc:'hook-error',
+          message: params.method+' method not found'
+        });
       }
 
+    }catch(err){
 
-    }else{
-      res.json({
-        desc:'hook-error',
-        message: params.method+' method not found'
-      });
     }
+
+
   },
 
   _queryCommandStatus(onSuccess){
