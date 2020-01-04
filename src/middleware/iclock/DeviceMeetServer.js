@@ -302,7 +302,7 @@ class mDeviceMeetServer {
 
           console.log("PUSH ME")
           console.log('***************/push  || device get parameters from server***************');
-          retValue = "ServerVersion=1.0\nServerName=VKServer\nPushVersion=5.6\nErrorDelay=1\nRequestDelay=2\nTransTimes==00:0023:59\nTransInterval=1\nTransTables=User\tTransaction\nRealtime=1\nSessionID="+req.sessionID+"\nTimeoutSec=1";
+          retValue = "ServerVersion=1.0\nServerName=VKServer\nPushVersion=5.6\nErrorDelay=1\nRequestDelay=1\nTransTimes==00:0023:59\nTransInterval=1\nTransTables=User\tTransaction\nRealtime=1\nSessionID="+req.sessionID+"\nTimeoutSec=1";
 
         break;
 
