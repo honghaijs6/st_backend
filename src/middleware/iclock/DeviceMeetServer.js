@@ -16,7 +16,7 @@ class mDeviceMeetServer {
 
   constructor(app){
 
-    this.app = app ; 
+    this.app = app ;
     this._isRegiter  = false;
 
     this.moCoupon = mCoupon(app) ;
@@ -60,19 +60,19 @@ class mDeviceMeetServer {
   */
 
 
-  
+
   /*
-  VERIFY WITH DATABASE 
+  VERIFY WITH DATABASE
   */
   _doVerifyTicket(json){
 
 
-    this.moCoupon.getInfoByCode(json.cardno).then((res)=>{ 
+    this.moCoupon.getInfoByCode(json.cardno).then((res)=>{
       const info = res.data ;
       //const count = parseInt(info.used_count) + 1 ;
       if(info.id !== undefined ){
-        
-        // REMOTE OPEN HERE 
+
+        // REMOTE OPEN HERE
         const door = json.eventaddr ;
         const retValue = "C:"+COUNT+":CONTROL DEVICE 010"+door+"0101" ;
         comands.push(retValue) ;
@@ -81,15 +81,22 @@ class mDeviceMeetServer {
           id:info.id,
           cardno:json.cardno
         });
-        
+
       }
     }).catch((err)=>{
       console.log(err) ;
     })
 
+  }
 
-    
-    
+  _doDeleteCardOnDevice(json){
+
+    try{
+      const retValue = "C:"+COUNT+":DATA DELETE user Pin="+json.pin+"\r\n";
+      comands.push(retValue) ;
+
+    }catch(err){}
+
 
 
   }
@@ -97,18 +104,18 @@ class mDeviceMeetServer {
 
   _parseDevState(json){
 
-    const lockCount = 4 ; 
-    
-    
+    const lockCount = 4 ;
+
+
 		const sensor = this._getBinary(json.sensor, lockCount, 2, false);
     //relay = getBinary(relay, lockCount, 1, false);
-		
+
     //door=getBinary(door, lockCount, 8, false);
-    
+
     return {
       sensor
     }
-    
+
   }
   _getBinary(hexStrValue="", lockCount=4, bitConvert=1, reverse=true){
 
@@ -154,10 +161,20 @@ class mDeviceMeetServer {
                 return ret;
   }
 
+
+  _createRegCode(sn){
+
+    let text = sn.split("").reverse().join("");
+    text = text.substring(0,10);
+    text = text.split("").reverse().join("");
+    return text;
+
+
+  }
   doPost(req,res){
 
     let retValue = 'OK';
-    res.header("Content-Type", "text/plain;charset=UTF-8");
+    res.header("Content-Type", "text/plain");
 
     const params = req.params;
     const query = req.query;
@@ -171,8 +188,7 @@ class mDeviceMeetServer {
       switch(params.param){
 
         case 'cdata':
-           console.log('cdata======') ;
-           console.log(query) ;
+
 
            let type = query.table ;
            if(type == null && query.AuthType != null){
@@ -193,45 +209,14 @@ class mDeviceMeetServer {
 
                 console.log("***************/cdata type=rtstate  || post device's state to server***************") ;
 
-                this._getStreamData(req,(line)=>{
-
-                  /*const url = line.replace(/\t/g,"&");
-                  const json = this.conUrlToJson(url);
-
-                  console.log(json) ;
-
-                  const rtState = this._parseDevState(json)
-                  console.log(rtState);
-
-
-                  /*setTimeout(()=>{
-                    if(DELETE_DB_CMD.length > 0){
-
-
-
-                      const item = DELETE_DB_CMD[0];
-                      console.log(item)
-  
-                      this.moCoupon.destroy({
-                        where:{
-                          id:item.id
-                        }
-                      }).then((res)=>{
-                        console.log("delete DB success");
-                        DELETE_DB_CMD.shift();
-                      });
-                    }
-                  },2000);*/
-                  
-
-
-                })
+                /*this._getStreamData(req,(line)=>{
+                })*/
 
               break;
 
               case 'rtlog':
                 console.log("***************/cdata type=rtlog  || post device's event to server***************");
-                
+
                 //console.log(req);
 
 
@@ -247,12 +232,14 @@ class mDeviceMeetServer {
                       if(json.pin==="0"){
                         console.log(" =============== QUET TICKET ==================") ;
                         this._doVerifyTicket(json) ;
-                      
+
                       }else{
                         console.log(" =============== QUET THE ==================") ;
-                        
+
+                        this._doDeleteCardOnDevice(json)
+
                       }
-                      
+
                       //retValue = "C:"+COUNT+":CONTROL DEVICE 01010101" ;
                       //comands.push(retValue) ;
                     }
@@ -288,15 +275,22 @@ class mDeviceMeetServer {
 
         case 'registry':
 
-           console.log("REGISTRY")
+           console.log("========REGISTRY=============") ;
+           const regCode = this._createRegCode(query.SN);
+
+
 
            if(!this._isRegiter){
               console.log('***************/registry  || Start to regist***************');
-              retValue = "RegistryCode=Uy47fxftP3" //+query.SN ;
-              console.log("has been registed，register code : Uy47fxftP3") ;
+
+
+
+              retValue = "RegistryCode="+regCode //+query.SN ;
+              console.log("====sn: "+query.SN)
+              console.log("has been registed，register code : "+regCode) ;
               this._isRegiter = true ;
            }else{
-              retValue = "RegistryCode=Uy47fxftP3"//+query.SN ;
+              retValue = "RegistryCode="+regCode;//+query.SN ;
               //console.log("has registed :"+query.SN) ;
            }
 
@@ -339,7 +333,7 @@ class mDeviceMeetServer {
               if(parseInt(json.Return) >= 0){
 
                 if(DELETE_DB_CMD.length > 0){
-  
+
                   const item = DELETE_DB_CMD[0];
                   this.moCoupon.destroy({
                     where:{
@@ -355,7 +349,7 @@ class mDeviceMeetServer {
             }catch(err){
               console.log("================ ERROR RETURN FROM DEVICE") ;
             }
-           
+
           })
 
         break ;
@@ -365,7 +359,9 @@ class mDeviceMeetServer {
             this._getStreamData(req,(line)=>{
               const url = line.replace(/\t/g,"&");
               const json = this.conUrlToJson(url);
-              console.log(json) ; 
+              console.log(json) ;
+
+              console.log("===========END QUERY ===========================") ;
             });
         break ;
 
@@ -403,42 +399,7 @@ class mDeviceMeetServer {
   }
 
 
-  // GET : RESPONE FOR DEVICE
-  /*
-    CDATA -->
-    <----
-    PUSH
 
-  */
-  doGet(req,res){
-
-      /*res.header("Content-Type", "text/plain;charset=utf-8");
-
-      let retValue = 'OK';
-      const params = req.params;
-      const query = req.query;
-
-      console.log('===== GET =====') ;
-      switch(params.params){
-
-        case 'push':
-          retValue = "ServerVersion=3.1.1\nServerName=ADMS\nPushVersion=3.2.0\nErrorDelay=60\nRequestDelay=5\nTransTimes=00:00  14:00\nTransInterval=1\nTransTables=User  Transaction\nRealtime=1\nSessionID=d8y8o75hgn"
-        break ;
-
-        default:
-
-        break ;
-      }
-      res.send(retValue);
-
-
-      console.log("==== END GET ====") ;*/
-
-
-
-
-
-  }
 }
 
 module.exports =   mDeviceMeetServer;
