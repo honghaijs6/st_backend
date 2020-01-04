@@ -2,19 +2,20 @@
 
 
 const bodyParser = require('body-parser');
-const DeviceMeetServer = require('./DeviceMeetServer') ;
+const mDeviceMeetServer = require('./DeviceMeetServer') ;
 
 
 const iclock = (app)=>{
 
 
+  const DeviceMeetServer = new mDeviceMeetServer(app);
 
   /* METHOD POST */
   app.post('/iclock/:param',  bodyParser.raw({ type : '*/*' }), async (req,res)=>{
 
 
     DeviceMeetServer.doPost(req,res) ;
-
+ 
   })
 
 

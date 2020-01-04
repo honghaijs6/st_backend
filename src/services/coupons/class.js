@@ -97,10 +97,10 @@ class iRoute extends Service {
 
           //}else{
             // INSERT DATABASE AND DEVICE TOO
-            const isSuccess = await pushapi.pushCode(data.code,data.device_serial, data.starttime,data.endtime);
-            if(isSuccess){
-              data_out.data = data_out.name==='success' ?  await this.Model.create(data) : data_out.data ;
-            }
+            //const isSuccess = await pushapi.pushCode(data.code,data.device_serial, data.starttime,data.endtime);
+            //if(isSuccess){
+            data_out.data = data_out.name==='success' ?  await this.Model.create(data) : data_out.data ;
+            //}
 
 
 

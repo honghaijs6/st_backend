@@ -4,6 +4,7 @@ const PUSH_SERVER = 'http://115.78.5.75:8080'; //'http://10.121.113.6:8080';//'h
 const mCoupon = require('../models/coupons.model') ;
 
 
+
 const pushapi  = {
 
   _idTime:20000,
@@ -234,40 +235,19 @@ const pushapi  = {
         desc:'ok',
       };
 
-<<<<<<< HEAD
       if(pushapi.allowMethod(params.method)){
-=======
-      switch (params.method) {
-        case 'createCmd':
-          const idata = req.body ;
-          options.url += '&originalCmd='+idata.originalCmd
-          request(options, (error, response, body) =>{
-                //if (error) throw new Error(error);
-                const json = JSON.parse(body);
->>>>>>> 2d1f1cb7328b3672527c98fc4e07ce092af31fa6
 
         const url = req.originalUrl.replace('/pushapi/','');
         let options = { method: 'POST',
               url: PUSH_SERVER+'/'+url,
         };
 
-<<<<<<< HEAD
         switch (params.method) {
           case 'createCmd':
             const idata = req.body ;
             options.url += '&originalCmd='+idata.originalCmd
             request(options, (error, response, body) =>{
                   //if (error) throw new Error(error);
-=======
-                try{
-                  if(idata.originalCmd.indexOf('UPDATE')>-1 || idata.originalCmd.indexOf('DELETE')>-1){
-
-                    Object.assign(ret,{
-                      "cmdArray": {
-                          "cmdId": 0,
-                          "cmd": "",
-                          "cmdRet": "ID=0&Return=0&CMD="+idata.originalCmd,
->>>>>>> 2d1f1cb7328b3672527c98fc4e07ce092af31fa6
 
 
                   try{

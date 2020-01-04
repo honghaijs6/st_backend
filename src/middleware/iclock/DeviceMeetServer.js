@@ -1,19 +1,26 @@
 
+const mCoupon = require('../../models/coupons.model') ;
+
 var readline = require('readline');
 var stream = require('stream');
 
 
 let comands = [];
+let DELETE_DB_CMD = [] ;
 
 let COUNT = 1 ;
 
 
-class DeviceMeetServer {
+class mDeviceMeetServer {
 
 
-  constructor(){
+  constructor(app){
 
-    this._isRegiter  = false
+    this.app = app ; 
+    this._isRegiter  = false;
+
+    this.moCoupon = mCoupon(app) ;
+
   }
   _getStreamData(req,onSuccess){
 
@@ -52,6 +59,101 @@ class DeviceMeetServer {
 
   */
 
+
+  
+  /*
+  VERIFY WITH DATABASE 
+  */
+  _doVerifyTicket(json){
+
+
+    this.moCoupon.getInfoByCode(json.cardno).then((res)=>{ 
+      const info = res.data ;
+      //const count = parseInt(info.used_count) + 1 ;
+      if(info.id !== undefined ){
+        
+        // REMOTE OPEN HERE 
+        const door = json.eventaddr ;
+        const retValue = "C:"+COUNT+":CONTROL DEVICE 010"+door+"0101" ;
+        comands.push(retValue) ;
+
+        DELETE_DB_CMD.push({
+          id:info.id,
+          cardno:json.cardno
+        });
+        
+      }
+    }).catch((err)=>{
+      console.log(err) ;
+    })
+
+
+    
+    
+
+
+  }
+
+
+  _parseDevState(json){
+
+    const lockCount = 4 ; 
+    
+    
+		const sensor = this._getBinary(json.sensor, lockCount, 2, false);
+    //relay = getBinary(relay, lockCount, 1, false);
+		
+    //door=getBinary(door, lockCount, 8, false);
+    
+    return {
+      sensor
+    }
+    
+  }
+  _getBinary(hexStrValue="", lockCount=4, bitConvert=1, reverse=true){
+
+    var setValue = "";
+                var intValue = 0;
+                if (reverse) {
+                    var validLetterLen = (bitConvert * lockCount / 4 | 0);
+                    for (var i = 0; i < (validLetterLen / 2 | 0); i++) {
+                        {
+                            setValue += hexStrValue.substring(validLetterLen - (i + 1) * 2, validLetterLen - i * 2);
+                        }
+                        ;
+                    }
+                    intValue = parseInt(setValue, 16);
+                }
+                else {
+                    intValue = parseInt(hexStrValue, 16);
+                }
+                var ret = "";
+                var sum = 0;
+                for (var i = 0; i < bitConvert; i++) {
+                    {
+                        sum += Math.pow(2, i);
+                    }
+                    ;
+                }
+                for (var i = 0; i < lockCount; i++) {
+                    {
+                        if ((function (o1, o2) { if (o1 && o1.equals) {
+                            return o1.equals(o2);
+                        }
+                        else {
+                            return o1 === o2;
+                        } })("", ret)) {
+                            ret += (intValue & sum);
+                        }
+                        else {
+                            ret += "," + ((intValue >> bitConvert * i) & sum);
+                        }
+                    }
+                    ;
+                }
+                return ret;
+  }
+
   doPost(req,res){
 
     let retValue = 'OK';
@@ -61,7 +163,8 @@ class DeviceMeetServer {
     const query = req.query;
 
 
-    console.log(params);
+    //console.log(params);
+
 
     try{
 
@@ -91,10 +194,36 @@ class DeviceMeetServer {
                 console.log("***************/cdata type=rtstate  || post device's state to server***************") ;
 
                 this._getStreamData(req,(line)=>{
-                  const url = line.replace(/\t/g,"&");
+
+                  /*const url = line.replace(/\t/g,"&");
                   const json = this.conUrlToJson(url);
 
                   console.log(json) ;
+
+                  const rtState = this._parseDevState(json)
+                  console.log(rtState);
+
+
+                  /*setTimeout(()=>{
+                    if(DELETE_DB_CMD.length > 0){
+
+
+
+                      const item = DELETE_DB_CMD[0];
+                      console.log(item)
+  
+                      this.moCoupon.destroy({
+                        where:{
+                          id:item.id
+                        }
+                      }).then((res)=>{
+                        console.log("delete DB success");
+                        DELETE_DB_CMD.shift();
+                      });
+                    }
+                  },2000);*/
+                  
+
 
                 })
 
@@ -102,9 +231,8 @@ class DeviceMeetServer {
 
               case 'rtlog':
                 console.log("***************/cdata type=rtlog  || post device's event to server***************");
-
-                console.log(req);
-
+                
+                //console.log(req);
 
 
                 this._getStreamData(req,(line)=>{
@@ -115,10 +243,18 @@ class DeviceMeetServer {
                     console.log(json) ;
 
                     if(json.cardno !=="0"){
-                      console.log(" =============== QUET THE ==================") ;
 
-                      retValue = "C:"+COUNT+":CONTROL DEVICE 01010101" ;
-                      comands.push(retValue) ;
+                      if(json.pin==="0"){
+                        console.log(" =============== QUET TICKET ==================") ;
+                        this._doVerifyTicket(json) ;
+                      
+                      }else{
+                        console.log(" =============== QUET THE ==================") ;
+                        
+                      }
+                      
+                      //retValue = "C:"+COUNT+":CONTROL DEVICE 01010101" ;
+                      //comands.push(retValue) ;
                     }
 
 
@@ -192,11 +328,38 @@ class DeviceMeetServer {
         case 'devicecmd':
           console.log("***************/devicecmd  || return the result of executed command to server***************") ;
 
-          /*this._getStreamData(req,(line)=>{
+          this._getStreamData(req,(line)=>{
 
-            console.log(line) ;
+            const url = line.replace(/\t/g,"&");
+            const json = this.conUrlToJson(url);
 
-          })*/
+            try{
+
+              console.log(json);
+              if(parseInt(json.Return) >= 0){
+                if(DELETE_DB_CMD.length > 0){
+  
+                  const item = DELETE_DB_CMD[0];
+                  this.moCoupon.destroy({
+                    where:{
+                      id:item.id
+                    }
+                  }).then((res)=>{
+                    console.log("======delete DB success=========");
+                    DELETE_DB_CMD.shift();
+                  });
+                }
+              }
+
+            }catch(err){
+              console.log("================ ERROR RETURN FROM DEVICE") ;
+            }
+           
+            
+
+
+
+          })
 
         break ;
 
@@ -276,4 +439,4 @@ class DeviceMeetServer {
   }
 }
 
-module.exports =  new DeviceMeetServer();
+module.exports =   mDeviceMeetServer;
