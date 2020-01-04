@@ -16,6 +16,7 @@ const mode = 'coupons';
 
 const { Service } = require( 'feathers-sequelize');
 const mModel = require('../../models/'+mode+'.model');
+const pushapi = require('../../middleware/pushapi');
 
 const Helper = require('../../models/helper');
 
@@ -90,11 +91,21 @@ class iRoute extends Service {
         if(data_out.name==="success"){
 
 
-          data.code =  data.card_type === 0 ?  await this.Model._createCode() : data.code ;
-          data_out.data = data_out.name==='success' ?  await this.Model.create(data) : data_out.data ;
-            const rows = await this.Model.listAll('all',{query:{
-                max:1
-          }});
+          //if(data.device_serial === undefined){
+            //data.code =  data.card_type === 0 ?  await this.Model._createCode() : data.code ;
+          //  data_out.data = data_out.name==='success' ?  await this.Model.create(data) : data_out.data ;
+
+          //}else{
+            // INSERT DATABASE AND DEVICE TOO
+            const isSuccess = await pushapi.pushCode(data.code,data.device_serial, data.starttime,data.endtime);
+            if(isSuccess){
+              data_out.data = data_out.name==='success' ?  await this.Model.create(data) : data_out.data ;
+            }
+
+
+
+          //}
+
 
 
           /*const resIsExisted =   await this.Model.isExisted(data.code);
@@ -120,6 +131,39 @@ class iRoute extends Service {
         }
 
         return data_out;
+
+    }
+
+    // METHOD PUT :
+    async reset(data,params){
+
+      let isSuccess =  await pushapi.pushCode(data.code,data.device_serial, data.starttime,data.endtime);
+      if(isSuccess){
+          const info = await this.Model.getInfoByCode(data.code) ;
+          const condition = {
+            where:{
+              id:info.data.id
+            }
+          }
+
+          isSuccess = await this.Model.update(data,condition);
+      }
+
+      return parseInt(isSuccess[0]) > 0 ? true : false
+
+    }
+
+    // METHOD PUT
+    async rm(data,params){
+
+      let isSuccess = await pushapi.delCode(data.code,data.device_serial) ;
+      if(isSuccess){
+        const info = await this.Model.getInfoByCode(data.code) ;
+        isSuccess = await super.remove(info.data.id,params);
+      }
+
+      return isSuccess.id !== undefined ? true : false ;
+
 
     }
 

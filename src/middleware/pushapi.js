@@ -155,6 +155,75 @@ const pushapi  = {
     },1000)
   },
 
+
+  delCode(code,sn){
+
+     return new Promise((resolve,reject)=>{
+
+       // REMOVE USER
+       const url = 'createCmd?cmdType=userDefined&sn='+sn;
+       let options = { method: 'POST',
+             url: PUSH_SERVER+'/'+url,
+       };
+       options.url += '&originalCmd=DATA DELETE user pin='+code ;
+       request(options, (error, response, body) =>{
+          // REMOVE ACCESS LEVEL
+          let options2 = { method: 'POST',
+                url: PUSH_SERVER+'/'+url,
+          };
+          options2.url += '&originalCmd=DATA DELETE userauthorize pin='+code+'	authorizedoorid=1' ;
+          request(options2, (error, response, body) =>{
+
+              setTimeout(()=>{
+                resolve(true);
+              },500)
+
+          })
+
+
+       })
+
+
+
+     })
+  },
+  pushCode(code,sn,starttime=0,endtime=0){
+
+
+      return new Promise((resolve,reject)=>{
+
+        const url = 'createCmd?cmdType=userDefined&sn='+sn;
+        let options = { method: 'POST',
+              url: PUSH_SERVER+'/'+url,
+        };
+
+        options.url += '&originalCmd=DATA UPDATE user cardno='+code+'	pin='+code+'	password=	starttime='+starttime+'	endtime='+endtime+'	name=tiket	superauthorize=0	disable=0' ;
+
+
+        request(options, (error, response, body) =>{
+
+            // SET ACCESS LEVEL  4 GATE
+            let options2 = { method: 'POST',
+                  url: PUSH_SERVER+'/'+url,
+            };
+
+            options2.url += '&originalCmd=DATA UPDATE userauthorize pin='+code+'	authorizetimezoneid=1	authorizedoorid=15' ;
+
+            request(options2, (error, response, body) =>{
+               setTimeout(()=>{
+                 resolve(true)
+               },500)
+            })
+
+        });
+
+      })
+
+
+
+
+  },
+
   post(req,res){
 
     try{
@@ -165,19 +234,40 @@ const pushapi  = {
         desc:'ok',
       };
 
+<<<<<<< HEAD
       if(pushapi.allowMethod(params.method)){
+=======
+      switch (params.method) {
+        case 'createCmd':
+          const idata = req.body ;
+          options.url += '&originalCmd='+idata.originalCmd
+          request(options, (error, response, body) =>{
+                //if (error) throw new Error(error);
+                const json = JSON.parse(body);
+>>>>>>> 2d1f1cb7328b3672527c98fc4e07ce092af31fa6
 
         const url = req.originalUrl.replace('/pushapi/','');
         let options = { method: 'POST',
               url: PUSH_SERVER+'/'+url,
         };
 
+<<<<<<< HEAD
         switch (params.method) {
           case 'createCmd':
             const idata = req.body ;
             options.url += '&originalCmd='+idata.originalCmd
             request(options, (error, response, body) =>{
                   //if (error) throw new Error(error);
+=======
+                try{
+                  if(idata.originalCmd.indexOf('UPDATE')>-1 || idata.originalCmd.indexOf('DELETE')>-1){
+
+                    Object.assign(ret,{
+                      "cmdArray": {
+                          "cmdId": 0,
+                          "cmd": "",
+                          "cmdRet": "ID=0&Return=0&CMD="+idata.originalCmd,
+>>>>>>> 2d1f1cb7328b3672527c98fc4e07ce092af31fa6
 
 
                   try{
