@@ -337,6 +337,7 @@ class mDeviceMeetServer {
 
               console.log(json);
               if(parseInt(json.Return) >= 0){
+
                 if(DELETE_DB_CMD.length > 0){
   
                   const item = DELETE_DB_CMD[0];
@@ -355,20 +356,21 @@ class mDeviceMeetServer {
               console.log("================ ERROR RETURN FROM DEVICE") ;
             }
            
-            
-
-
-
           })
 
         break ;
 
         case 'querydata':
             console.log("***************/querydata  ||response the server with person data that server asked***************")
+            this._getStreamData(req,(line)=>{
+              const url = line.replace(/\t/g,"&");
+              const json = this.conUrlToJson(url);
+              console.log(json) ; 
+            });
         break ;
 
         default :
-          console.log("***************unknown request:"+params.param+"***************") ;
+          console.log("***************unknown request: **************") ;
           //retValue = "404";
 
         break ;
